@@ -126,7 +126,7 @@ plot.Americas <- ggplot(data = brc.Americas, aes(x = year, y = brcrude)) +
   scale_x_discrete(labels = year.labels) + 
   plot.theme
 
-ggsave("americas_brc.pdf", plot = plot.Americas, width = 300, units = "mm", 
+ggsave("americas_brc.png", plot = plot.Americas, width = 300, units = "mm", 
        height = 200)
 ```
 
