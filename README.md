@@ -9,7 +9,7 @@ populous countries in the Americas.
 [Birth rate, crude per 1,000 people](https://data.worldbank.org/)
 
 ## Files
-**americas_brc.pdf** - Main visualization  
+**americas_brc.png** - Main visualization  
 **kcox_whitewinequality.rmd** - brc_notebook.Rmd  
 **/birth_rate_by_country_en_csv_v2** - directory containing .csv files 
 from The World Bank
