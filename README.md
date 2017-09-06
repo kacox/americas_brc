@@ -10,6 +10,6 @@ populous countries in the Americas.
 
 ## Files
 **americas_brc.png** - Main visualization  
-**kcox_whitewinequality.rmd** - brc_notebook.Rmd  
+**brc_notebook.rmd** - R Markdown file with code leading up to the visualization 
 **/birth_rate_by_country_en_csv_v2** - directory containing .csv files 
 from The World Bank

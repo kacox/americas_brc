@@ -1,0 +1,132 @@
+---
+title: "Birth rate, crude (per 1,000 people)"
+output: brc_notebook
+---
+
+Birth rate, crude (per 1,000 people)
+http://data.worldbank.org/
+
+```{r, message=FALSE, warning=FALSE}
+# Imports
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+```
+
+
+```{r}
+# Load the data
+brc.df <- 
+  read.csv("birth_rate_by_country_en_csv_v2/API_SP.DYN.CBRT.IN_DS2_en_csv_v2.csv", 
+           skip = 4)
+```
+
+```{r}
+# Fixing column names
+years.as.chars <- as.character(c(1960:2015))
+new.col.names <- c("Country.Name", "Country.Code", "Indicator.Name", 
+                   "Indicator.Code", years.as.chars, "2016", "Unknown")
+
+colnames(brc.df) <- new.col.names
+```
+
+```{r}
+# Keep only desired US variables and change to long format
+brc.US <- brc.df %>% subset(subset = (Country.Code == "USA"), 
+                            select = c("Country.Code", years.as.chars)) %>% 
+  gather(key = year, value = brcrude, as.character(c(1960:2015))) %>% 
+  arrange(year)
+```
+
+```{r}
+# Make custom x-axis labels for plot (to save space on axis)
+year.labels <- c((paste0("'", c(60:99))), (paste0("'0", as.character(c(0:9)))), 
+                 (paste0("'", c(10:15))))
+```
+
+**These are all the things you can adjust for the plot title**
+element_text(family = NULL, face = NULL, colour = NULL, size = NULL,
+  hjust = NULL, vjust = NULL, angle = NULL, lineheight = NULL,
+  color = NULL)
+
+```{r}
+# Custom plot theme
+plot.theme <- theme(plot.title = element_text(hjust = 0.5, size = 16, 
+                                              face = "bold"), 
+                    plot.subtitle = element_text(hjust = 0.5, size = 14), 
+                    panel.background = element_rect(fill="white", 
+                                                    color="white"),
+                    panel.grid.major.y = element_line(color = "gray70"),
+                    panel.grid.major.x = element_blank(), 
+                    panel.grid.minor.x = element_blank(), 
+                    legend.title = element_blank(), 
+                    axis.title.x = element_text(face = "bold"), 
+                    axis.title.y = element_text(face = "bold"))
+```
+
+
+```{r, fig.height=6, fig.width=10}
+# Plot
+ggplot(data = brc.US, aes(x = year, y = brcrude, group = 1)) +
+  geom_line(color = "blue", size = 1) + 
+  labs(x = "Year", y = "Birth Rate, Crude\n(Per 1,000 Births)", 
+       title = "Birth Rates in the United States", 
+       subtitle = "1960 to 2015") +
+  scale_x_discrete(labels = year.labels) + 
+  plot.theme
+```
+
+## Major Countries in the Americas
+**https://en.wikipedia.org/wiki/List_of_countries_in_the_Americas_by_population**
+_https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Officially_assigned_code_elements_
+
+Using the top 10 countries in the Americas by population.
+```{r}
+# Now for USA, Canada, and Mexico
+brc.Americas <- brc.df %>% subset(subset = (Country.Code == "USA" | 
+                                       Country.Code == "CAN" | 
+                                       Country.Code == "MEX" | 
+                                       Country.Code == "BRA" | 
+                                       Country.Code == "COL" | 
+                                       Country.Code == "ARG" | 
+                                       Country.Code == "PER" | 
+                                       Country.Code == "VEN" | 
+                                       Country.Code == "CHL" | 
+                                       Country.Code == "ECU"), 
+                            select = c("Country.Code", years.as.chars)) %>% 
+  gather(key = year, value = brcrude, as.character(c(1960:2015))) %>% 
+  arrange(Country.Code, year)
+```
+
+```{r}
+# Add column for region
+brc.Americas$region <- ifelse((brc.Americas$Country.Code == "USA" | 
+                                 brc.Americas$Country.Code == "CAN"), 
+                              "North America", 
+                              ifelse(brc.Americas$Country.Code == "MEX", 
+                                     "Central America", 
+                                     ifelse((brc.Americas$Country.Code == "BRA" | 
+                                               brc.Americas$Country.Code == "COL" | 
+                                               brc.Americas$Country.Code == "ARG" | 
+                                               brc.Americas$Country.Code == "PER" | 
+                                               brc.Americas$Country.Code == "VEN" | 
+                                               brc.Americas$Country.Code == "CHL" | 
+                                               brc.Americas$Country.Code == "ECU"), 
+                                            "South America", "Other")))
+```
+
+
+```{r, fig.height=5, fig.width=9}
+# Plot the countries
+plot.Americas <- ggplot(data = brc.Americas, aes(x = year, y = brcrude)) +
+  geom_line(aes(color = region, group = Country.Code), size = 1) + 
+  labs(x = "Year", y = "Birth Rate, Crude\n(Per 1,000 Births)", 
+       title = "Birth Rates of the 10 Most Populous Countries in the Americas", 
+       subtitle = "1960 to 2015") +
+  scale_x_discrete(labels = year.labels) + 
+  plot.theme
+
+ggsave("americas_brc.png", plot = plot.Americas, width = 300, units = "mm", 
+       height = 200)
+```
+
